@@ -1,0 +1,353 @@
+#define def_opt(name, ...)  static const char * (name)[] = {__VA_ARGS__, NULL}
+
+def_opt(opt_start_num, "-s", "--start-num", "<number>"
+"\n start printing from line <number>");
+def_opt(opt_back_num, "-b", "--back-num", "<number>"
+"\n print <number> lines back");
+def_opt(opt_fwd_num, "-f", "--forward-num", "<number>"
+"\n print <number> lines forward");
+def_opt(opt_until, "-u", "--until", "<number>"
+"\n print until line <number>");
+def_opt(opt_context, "-c", "--context", "<number>"
+"\n print <number> lines before and after");
+def_opt(opt_start_str, "-S", "--start-str", "<string>",
+"\n print from the first line containing <string>");
+def_opt(opt_back_str, "-B", "--back-str", "<string>"
+"\n print lines backwards until <string> is found");
+def_opt(opt_fwd_str, "-F", "--forward-str", "<string>"
+"\n print lines forward until <string> is found");
+def_opt(opt_nest, "-N", "--nested", "<string>"
+"\n print a proper nested block ending in <string>");
+def_opt(opt_end, "-e", "--end",
+"\n print until the end of the file");
+def_opt(opt_width, "-w", "--width", "<number>"
+"\n width of the line number field");
+def_opt(opt_quiet, "-q", "--quiet",
+"\n do not print line numbers");
+def_opt(opt_flen, "-l", "--length",
+"\n print the number of new line characters in FILE");
+def_opt(opt_help, "-h", "-?", "--help",
+"\n print this screen");
+def_opt(opt_version, "-v", "--version",
+"\n print version info");
+
+#define get_arg_val(arg_member, err_msg, no_err)\
+if (!arg) equit((err_msg), opt); else (arg_member) = (no_err)
+
+static const char * req_num_err = "option < %s > requires a number";
+static const char * req_str_err = "option < %s > requires a string";
+
+static void get_arg_vals(int argc, char * argv[], arg_vals * args);
+static int int_or_quit(const char * str);
+static void print_help(int exit_what);
+static void print_version(void);
+
+static int handle_start_num(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->first, req_num_err, int_or_quit(arg));
+	return pav-argv;
+}
+
+static int handle_back_num(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->prev, req_num_err, int_or_quit(arg));
+	return pav-argv;
+}
+
+static int handle_fwd_num(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->next, req_num_err, int_or_quit(arg));
+	return pav-argv;
+}
+
+static int handle_last(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->last, req_num_err, int_or_quit(arg));
+	return pav-argv;
+}
+
+static int handle_context(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->context, req_num_err, int_or_quit(arg));
+	return pav-argv;
+}
+
+static int handle_start_str(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->start, req_str_err, arg);
+	return pav-argv;
+}
+
+static int handle_back_str(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->back, req_str_err, arg);
+	return pav-argv;
+}
+
+static int handle_fwd_str(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->fwd, req_str_err, arg);
+	return pav-argv;
+}
+
+static int handle_nest(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->nested, req_str_err, arg);
+	return pav-argv;
+}
+
+static int handle_end(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+    char ** pav = argv;
+	pav++;
+    avp->end = true;
+	return pav-argv;
+}
+
+static int handle_width(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+	char ** pav = argv;
+	const char * opt = *pav++;
+	char * arg = *pav++;
+    get_arg_val(avp->width, req_num_err, int_or_quit(arg));
+	return pav-argv;
+}
+
+static int handle_quiet(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+    char ** pav = argv;
+	pav++;
+    avp->silent = true;
+	return pav-argv;
+}
+
+static int handle_flen(char ** argv, void * p)
+{
+	arg_vals * avp = p;
+    char ** pav = argv;
+	pav++;
+    avp->flength = true;
+	return pav-argv;
+}
+
+static int handle_help(char ** argv, void * p)
+{
+    char ** pav = argv;
+	pav++;
+    print_help(EXIT_SUCCESS);
+	return pav-argv;
+}
+
+static int handle_version(char ** argv, void * p)
+{
+    char ** pav = argv;
+	pav++;
+    print_version();
+	return pav-argv;
+}
+
+static int handle_fname(char ** argv, void * p)
+{
+    // no flag for file name; *argv is the actual argument
+    arg_vals * avp = p;
+    char ** pav = argv;
+	const char * arg = *pav++;
+    if (!avp->fname)
+        avp->fname = arg;
+    else
+        equit("< %s > already got a file < %s >", arg, avp->fname);
+    return pav-argv;
+}
+
+typedef int (*opt_handler)(char ** argv, void * p);
+typedef struct opt_tbl {
+    const char ** str_list;
+    opt_handler oh;
+} opt_tbl;
+
+static const opt_tbl global_opts_tbl[] = {
+    {opt_start_num, handle_start_num},
+    {opt_back_num,  handle_back_num},
+    {opt_fwd_num,   handle_fwd_num},
+    {opt_until,     handle_last},
+    {opt_context,   handle_context},
+    {opt_start_str, handle_start_str},
+    {opt_back_str,  handle_back_str},
+    {opt_fwd_str,   handle_fwd_str},
+    {opt_nest,      handle_nest},
+    {opt_end,       handle_end},
+    {opt_width,     handle_width},
+    {opt_quiet,     handle_quiet},
+    {opt_flen,      handle_flen},
+    {opt_help,      handle_help},
+    {opt_version,   handle_version},
+};
+
+static void get_arg_vals(int argc, char * argv[], arg_vals * args)
+{
+    char * this_opt;
+    int i = 1;
+    while (i < argc)
+    {
+        this_opt = argv[i];
+        if (this_opt)
+        {
+            if (*this_opt == OPT_START)
+            {
+                const char ** str_list;
+                for (int j = 0; j < end_of(global_opts_tbl); ++j)
+                {
+                    str_list = global_opts_tbl[j].str_list;
+                    while (*str_list)
+                    {
+                        if (strcmp(this_opt, *str_list) == 0)
+                        {
+                            i += global_opts_tbl[j].oh(argv+i, args);
+                            goto next_opt;
+                        }
+                        else
+                            ++str_list;
+                    }
+                }
+                equit("unknown option < %s >", argv[i]);
+            }
+            else
+            {
+                i += handle_fname(argv+i, args);
+                goto next_opt;
+            }
+        }
+
+        ++i;
+next_opt:
+        continue;
+    }
+}
+
+static int int_or_quit(const char * str)
+{
+    int ret = 0;
+
+    if (str)
+    {
+        if (!sscanf(str, "%d", &ret))
+            equit("< %s > is not a number", str);
+    }
+
+    return ret;
+}
+
+static void print_help(int exit_what)
+{
+    static const char default_is[] = ", default is %d";
+
+    printf("Usage: %s [FILE] [OPTION...]\n", prog_name);
+    puts("Prints a range of lines with optional context.\n");
+
+    puts("With no FILE, text is read from standard input. \"context\" is the "
+        "number of");
+    puts("lines that'd print before and after the result of all other actions. "
+        "If");
+    puts("the range is larger than the number of lines in the file, the output "
+        "is");
+    puts("truncated at the first and/or last line of the file.");
+
+    putchar('\n');
+    printf("Options:");
+
+    const char ** str_list;
+    for (int i = 0; i < end_of(global_opts_tbl); ++i)
+    {
+        putchar('\n');
+        str_list = global_opts_tbl[i].str_list;
+
+        while (*str_list)
+        {
+            printf(" %s", *str_list);
+
+            if (OPT_START == *str_list[0] &&
+                str_list[1] &&
+                OPT_START == *str_list[1])
+                putchar(',');
+
+            ++str_list;
+        }
+
+        if (handle_start_num == global_opts_tbl[i].oh)
+            printf(default_is, DEFAULT_FIRST_LINE);
+        else if (handle_width == global_opts_tbl[i].oh)
+            printf(default_is, DFEAULT_NUM_WIDTH);
+        else if (handle_start_str == global_opts_tbl[i].oh)
+            printf("\n overrides %s", *opt_start_num);
+        else if (handle_nest == global_opts_tbl[i].oh)
+        {
+            printf("\n start of the block is the argument to either %s or %s",
+                *opt_start_str, *opt_fwd_str);
+            printf("\n if both are present, %s overrides %s",
+                *opt_fwd_str, *opt_start_str);
+            printf("\n for example %s \"{\" %s \"}\" will print",
+                *opt_start_str, *opt_fwd_str);
+            printf("\n {\n \t{\n \t}\n");
+            printf("\n and %s \"{\" %s \"}\" will print",
+                *opt_start_str, *opt_nest);
+            printf("\n {\n \t{\n \t}\n }");
+        }
+
+        putchar('\n');
+    }
+
+    putchar('\n');
+    printf("Limits : up to %d lines with max line length of %d characters\n"
+        "including the new line character.\n",
+        INT_MAX, MAX_LINE_LEN_CH);
+    putchar('\n');
+    printf("Example: %s textfile %s 1 %s 5\n",
+        prog_name, *opt_start_num, *opt_fwd_num);
+
+    exit(exit_what);
+}
+
+static void print_version(void)
+{
+    printf("%s %s\n", prog_name, prog_version);
+    exit(EXIT_SUCCESS);
+}
