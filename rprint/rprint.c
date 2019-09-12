@@ -12,22 +12,23 @@
 #include <stdarg.h>
 #include <limits.h>
 #include <stdbool.h>
+#include "parse-opts/parse_opts.h"
 
-#define OPT_START           '-'
+//#define OPT_START           '-'
 #define DFEAULT_NUM_WIDTH   8
 #define DEFAULT_FIRST_LINE  1
 #define MAX_LINE_LEN_WITH_0 1024
 #define MAX_LINE_LEN_CH     (MAX_LINE_LEN_WITH_0-1)
 #define end_of(arr)         (sizeof((arr))/sizeof((*arr)))
 
-typedef struct {
+typedef struct arg_vals{
     int first, prev, next, last, context, width;
     const char * start, * back, * fwd, * nested, * fname;
     bool silent, flength, end;
     FILE * file;
 } arg_vals;
 
-static const char prog_version[] = "v1.2";
+static const char prog_version[] = "v1.21";
 static const char prog_name[]    = "rprint";
 
 static void rprint(arg_vals * args);
@@ -46,21 +47,92 @@ static void equit(const char * msg, ...);
 static FILE * lp_fopen(const char * fname);
 static void lp_fclose(FILE * file);
 
-#include "options.imp"
-
 static char line[MAX_LINE_LEN_WITH_0];
+
+#include "options.imp"
 
 int main(int argc, char * argv[])
 {
 #define call_and_rewind(...) __VA_ARGS__; rewind(args->file)
+    arg_vals args_, * args = &args_;
+    memset(args, 0, sizeof(*args));
+    args->first = DEFAULT_FIRST_LINE;
+    args->width = DFEAULT_NUM_WIDTH;
+
+    opts_table the_tbl;
+    help_arg harg = {.the_tbl = &the_tbl, .exit_code = EXIT_SUCCESS};
+
+    opts_entry opts[] = {
+        {.short_name = start_num_snm, .long_name = start_num_lnm,
+        .takes_arg = true,
+        .callback = start_num_handler, .callback_arg = args,
+        .print_help = start_num_help},
+        {.short_name = back_num_snm, .long_name = back_num_lnm,
+        .takes_arg = true,
+        .callback = back_num_handler, .callback_arg = args,
+        .print_help = back_num_help},
+        {.short_name = forward_num_snm, .long_name = forward_num_lnm,
+        .takes_arg = true,
+        .callback = forward_num_handler, .callback_arg = args,
+        .print_help = forward_num_help},
+        {.short_name = until_snm, .long_name = until_lnm,
+        .takes_arg = true,
+        .callback = until_handler, .callback_arg = args,
+        .print_help = until_help},
+        {.short_name = context_snm, .long_name = context_lnm,
+        .takes_arg = true,
+        .callback = context_handler, .callback_arg = args,
+        .print_help = context_help},
+        {.short_name = start_str_snm, .long_name = start_str_lnm,
+        .takes_arg = true,
+        .callback = start_str_handler, .callback_arg = args,
+        .print_help = start_str_help},
+        {.short_name = back_str_snm, .long_name = back_str_lnm,
+        .takes_arg = true,
+        .callback = back_str_handler, .callback_arg = args,
+        .print_help = back_str_help},
+        {.short_name = forward_str_snm, .long_name = forward_str_lnm,
+        .takes_arg = true,
+        .callback = forward_str_handler, .callback_arg = args,
+        .print_help = forward_str_help},
+        {.short_name = nested_snm, .long_name = nested_lnm,
+        .takes_arg = true,
+        .callback = nested_handler, .callback_arg = args,
+        .print_help = nested_help},
+        {.short_name = end_snm, .long_name = end_lnm,
+        .takes_arg = false,
+        .callback = end_handler, .callback_arg = args,
+        .print_help = end_help},
+        {.short_name = width_snm, .long_name = width_lnm,
+        .takes_arg = true,
+        .callback = width_handler, .callback_arg = args,
+        .print_help = width_help},
+        {.short_name = quiet_snm, .long_name = quiet_lnm,
+        .takes_arg = false,
+        .callback = quiet_handler, .callback_arg = args,
+        .print_help = quiet_help},
+        {.short_name = length_snm, .long_name = length_lnm,
+        .takes_arg = false,
+        .callback = length_handler, .callback_arg = args,
+        .print_help = length_help},
+        {.short_name = help_snm, .long_name = help_lnm,
+        .takes_arg = false,
+        .callback = help_handler, .callback_arg = &harg,
+        .print_help = help_print_help},
+        {.short_name = version_snm, .long_name = version_lnm,
+        .takes_arg = false,
+        .callback = version_handler, .callback_arg = args,
+        .print_help = version_help},
+    };
+
+    the_tbl.tbl = opts;
+    the_tbl.length = sizeof(opts)/sizeof(*opts);
+
     if (argc > 1)
     {
-        arg_vals args_, * args = &args_;
-        memset(args, 0, sizeof(*args));
-        args->first = DEFAULT_FIRST_LINE;
-        args->width = DFEAULT_NUM_WIDTH;
-
-        get_arg_vals(argc, argv, args);
+        opts_parse(
+            argc-1, argv+1, &the_tbl, unbound_arg, args, unknown_opt
+        );
 
         args->file = lp_fopen(args->fname);
 
@@ -100,7 +172,10 @@ int main(int argc, char * argv[])
         lp_fclose(args->file);
     }
     else
-        print_help(EXIT_FAILURE);
+    {
+        printf("try -%c for help\n", help_snm);
+        exit(EXIT_FAILURE);
+    }
 
     return 0;
 #undef call_and_rewind

@@ -1,0 +1,325 @@
+static const char start_num_snm = 's';
+static const char start_num_lnm[] = "start-num";
+static const char back_num_snm = 'b';
+static const char back_num_lnm[] = "back-num";
+static const char forward_num_snm = 'f';
+static const char forward_num_lnm[] = "forward-num";
+static const char until_snm = 'u';
+static const char until_lnm[] = "until";
+static const char context_snm = 'c';
+static const char context_lnm[] = "context";
+static const char start_str_snm = 'S';
+static const char start_str_lnm[] = "start-str";
+static const char back_str_snm = 'B';
+static const char back_str_lnm[] = "back-str";
+static const char forward_str_snm = 'F';
+static const char forward_str_lnm[] = "forward-str";
+static const char nested_snm = 'N';
+static const char nested_lnm[] = "nested";
+static const char end_snm = 'e';
+static const char end_lnm[] = "end";
+static const char width_snm = 'w';
+static const char width_lnm[] = "width";
+static const char quiet_snm = 'q';
+static const char quiet_lnm[] = "quiet";
+static const char length_snm = 'l';
+static const char length_lnm[] = "length";
+static const char help_snm = '?';
+static const char help_lnm[] = "help";
+static const char version_snm = 'v';
+static const char version_lnm[] = "version";
+
+static const char number[] = "<number>";
+static const char string[] = "<string>";
+static const char default_is[] = ", default is %d";
+
+static int int_or_quit(const char * str)
+{
+    int ret = 0;
+
+    if (str)
+    {
+        if (!sscanf(str, "%d", &ret))
+            equit("< %s > is not a number", str);
+    }
+
+    return ret;
+}
+//------------------------------------------------------------------------------
+
+static void start_num_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+    arg_vals * args = callback_arg;
+    args->first = int_or_quit(opt_arg);
+}
+
+static void start_num_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, number);
+    printf("start printing from line %s", number);
+    printf(default_is, DEFAULT_FIRST_LINE);
+    putchar('\n');
+    putchar('\n');
+}
+
+//------------------------------------------------------------------------------
+
+static void back_num_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+    arg_vals * args = callback_arg;
+    args->prev = int_or_quit(opt_arg);
+}
+
+static void back_num_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, number);
+    printf("print %s lines back\n", number);
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void forward_num_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+    arg_vals * args = callback_arg;
+    args->next = int_or_quit(opt_arg);
+}
+
+static void forward_num_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, number);
+    printf("print %s lines forward\n", number);
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void until_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->last = int_or_quit(opt_arg);
+}
+
+static void until_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, number);
+    printf("print until line %s\n", number);
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void context_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->context = int_or_quit(opt_arg);
+}
+
+static void context_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, number);
+    printf("print %s lines before and after\n", number);
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void start_str_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->start = opt_arg;
+}
+
+static void start_str_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, string);
+    printf("print from the first line containing %s", string);
+    printf(", overrides -%c\n", start_num_snm);
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void back_str_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->back = opt_arg;
+}
+
+static void back_str_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, string);
+    printf("print lines backwards until %s is found\n", string);
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void forward_str_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->fwd = opt_arg;
+}
+
+static void forward_str_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, string);
+    printf("print lines forward until %s is found\n", string);
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void nested_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->nested = opt_arg;
+}
+
+static void nested_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, string);
+    printf("print a proper nested block ending in %s\n", string);
+    printf("start of the block is the argument to either -%c or -%c\n",
+        start_str_snm, forward_str_snm);
+    printf("if both are present, -%c overrides -%c\n",
+        forward_str_snm, start_str_snm);
+    printf("for example -%c \"{\" -%c \"}\" will print\n",
+        start_str_snm, forward_str_snm);
+    printf("{\n \t{\n \t}\n");
+    printf("\nand -%c \"{\" -%c \"}\" will print\n",
+        start_str_snm, nested_snm);
+    printf("\n{\n \t{\n \t}\n }");
+    putchar('\n');
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void end_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->end = true;
+}
+
+static void end_help(char * short_name, char * long_name)
+{
+    printf("%s, %s\n", short_name, long_name);
+    printf("print until the end of the file\n");
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void width_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->width = int_or_quit(opt_arg);
+}
+
+static void width_help(char * short_name, char * long_name)
+{
+    printf("%s, %s %s\n", short_name, long_name, number);
+    printf("width of the line number field");
+    printf(default_is, DFEAULT_NUM_WIDTH);
+    putchar('\n');
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void quiet_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->silent = true;
+}
+
+static void quiet_help(char * short_name, char * long_name)
+{
+    printf("%s, %s\n", short_name, long_name);
+    printf("do not print line numbers\n");
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void length_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+	arg_vals * args = callback_arg;
+    args->flength = true;
+}
+
+static void length_help(char * short_name, char * long_name)
+{
+    printf("%s, %s\n", short_name, long_name);
+    printf("print the number of new line characters in FILE\n");
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void version_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+    printf("%s %s\n", prog_name, prog_version);
+    exit(EXIT_SUCCESS);
+}
+
+static void version_help(char * short_name, char * long_name)
+{
+    printf("%s, %s\n", short_name, long_name);
+    printf("print version info\n");
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+typedef struct help_arg {
+    opts_table * the_tbl;
+    int exit_code;
+} help_arg;
+
+static void help_print_head(void)
+{
+    printf("Usage: %s [FILE] [OPTION...]\n", prog_name);
+    puts("Prints a range of lines with optional context.\n");
+
+    puts("With no FILE, text is read from standard input. \"context\" is the "
+        "number of");
+    puts("lines that'd print before and after the result of all other actions. "
+        "If");
+    puts("the range is larger than the number of lines in the file, the output "
+        "is");
+    puts("truncated at the first and/or last line of the file.");
+    putchar('\n');
+    printf("Options:");
+    putchar('\n');
+}
+
+static void help_print_tail(void)
+{
+    printf("Limits : up to %d lines with max line length of %d characters\n"
+        "including the new line character.\n",
+        INT_MAX, MAX_LINE_LEN_CH);
+    putchar('\n');
+    printf("Example: %s textfile -%c 1 -%c 5\n",
+        prog_name, start_num_snm, forward_num_snm);
+}
+
+static void help_handler(char * opt, char * opt_arg, void * callback_arg)
+{
+    help_arg * ha = callback_arg;
+    help_print_head();
+    opts_print_help(ha->the_tbl);
+    help_print_tail();
+    exit(ha->exit_code);
+}
+
+static void help_print_help(char * short_name, char * long_name)
+{
+    printf("%s, %s\n", short_name, long_name);
+    puts("print this screen");
+    putchar('\n');
+}
+//------------------------------------------------------------------------------
+
+static void unbound_arg(char * opt, char * opt_arg, void * callback_arg)
+{
+    arg_vals * args = callback_arg;
+    if (!args->fname)
+        args->fname = opt_arg;
+    else
+        equit("< %s > already got a file < %s >", opt_arg, args->fname);
+}
+
+static void unknown_opt(char * opt, char * opt_arg, void * callback_arg)
+{
+    equit("unknown option < %s >", opt);
+}
+//------------------------------------------------------------------------------

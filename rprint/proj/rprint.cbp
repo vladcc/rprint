@@ -32,6 +32,10 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="../options.imp" />
+		<Unit filename="../parse-opts/parse_opts.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../parse-opts/parse_opts.h" />
 		<Unit filename="../rprint.c">
 			<Option compilerVar="CC" />
 		</Unit>
