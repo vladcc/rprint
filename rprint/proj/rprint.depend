@@ -19,7 +19,7 @@
 	<stdbool.h>
 	"parse-opts/parse_opts.h"
 
-1568236805 source:/home/vld/Projects/rprint/rprint/parse-opts/parse_opts.c
+1568457295 source:/home/vld/Projects/rprint/rprint/parse-opts/parse_opts.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -27,6 +27,18 @@
 	<stdbool.h>
 	"parse_opts.h"
 
-1568324994 /home/vld/Projects/rprint/rprint/parse-opts/parse_opts.h
+1568457603 /home/vld/Projects/rprint/rprint/parse-opts/parse_opts.h
 	<stdbool.h>
+
+1568458665 source:/home/vld/Projects/rprint/rprint/rprint.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdarg.h>
+	<limits.h>
+	<stdbool.h>
+	"parse-opts/parse_opts.h"
+	"options.imp"
+
+1568326456 /home/vld/Projects/rprint/rprint/options.imp
 

@@ -1,0 +1,4 @@
+8           const char * str_nested = args->nested;
+9       
+10          i = start = back = fwd = 0;
+11          while ((read = read_string(line, MAX_LINE_LEN_WITH_0, args->file)))

@@ -1,0 +1,8 @@
+11          while ((read = read_string(line, MAX_LINE_LEN_WITH_0, args->file)))
+12          {
+13              ++i;
+14              if (strstr(line, str_start))
+15              {
+16                  start = i;
+17                  break;
+18              }

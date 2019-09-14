@@ -1,0 +1,48 @@
+static int get_str_start_back_fwd(arg_vals * args, int * o_back, int * o_fwd)
+{
+    int read;
+    int i, start, back, fwd;
+    const char * str_start = args->start;
+    const char * str_back = args->back;
+    const char * str_fwd = args->fwd;
+    const char * str_nested = args->nested;
+
+    i = start = back = fwd = 0;
+    while ((read = read_string(line, MAX_LINE_LEN_WITH_0, args->file)))
+    {
+        ++i;
+        if (strstr(line, str_start))
+        {
+            start = i;
+            break;
+        }
+
+        if (str_back && strstr(line, str_back))
+            back = i;
+    }
+
+    if (str_fwd)
+    {
+        while ((read = read_string(line, MAX_LINE_LEN_WITH_0, args->file)))
+        {
+            ++i;
+            if (strstr(line, str_fwd))
+            {
+                fwd = i;
+                break;
+            }
+        }
+
+        if (str_nested)
+            fwd += get_nested_or_quit(args, i);
+    }
+    else if (str_nested)
+    {
+        args->fwd = args->start;
+        fwd = start + get_nested_or_quit(args, start);
+    }
+
+    *o_back = back;
+    *o_fwd = fwd;
+    return start;
+}

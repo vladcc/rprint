@@ -1,0 +1,8 @@
+41              args->fwd = args->start;
+42              fwd = start + get_nested_or_quit(args, start);
+43          }
+44      
+45          *o_back = back;
+46          *o_fwd = fwd;
+47          return start;
+48      }

@@ -1,0 +1,5 @@
+18              }
+19      
+20              if (str_back && strstr(line, str_back))
+21                  back = i;
+22          }

@@ -14,12 +14,10 @@
 #include <stdbool.h>
 #include "parse-opts/parse_opts.h"
 
-//#define OPT_START           '-'
 #define DFEAULT_NUM_WIDTH   8
 #define DEFAULT_FIRST_LINE  1
 #define MAX_LINE_LEN_WITH_0 1024
 #define MAX_LINE_LEN_CH     (MAX_LINE_LEN_WITH_0-1)
-#define end_of(arr)         (sizeof((arr))/sizeof((*arr)))
 
 typedef struct arg_vals{
     int first, prev, next, last, context, width;

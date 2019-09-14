@@ -39,6 +39,7 @@
 		<Unit filename="../rprint.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../run_tests.sh" />
 		<Extensions>
 			<code_completion />
 			<debugger />

@@ -1,0 +1,11 @@
+1 static int get_str_start_back_fwd(arg_vals * args, int * o_back, int * o_fwd)
+2 {
+3     int read;
+4     int i, start, back, fwd;
+5     const char * str_start = args->start;
+6     const char * str_back = args->back;
+7     const char * str_fwd = args->fwd;
+8     const char * str_nested = args->nested;
+9 
+10    i = start = back = fwd = 0;
+11    while ((read = read_string(line, MAX_LINE_LEN_WITH_0, args->file)))

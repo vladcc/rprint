@@ -1,0 +1,2 @@
+1       static int get_str_start_back_fwd(arg_vals * args, int * o_back, int * o_fwd)
+2       {
