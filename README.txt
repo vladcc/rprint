@@ -1,0 +1,79 @@
+# rprint
+text file line range printing
+
+Print a specific line, a range of lines, and optionally the surrounding context.
+
+Compile: gcc rprint.c ./parse-opts/parse_opts.c -o rprint
+
+Usage: rprint [FILE] [OPTION...]
+Prints a range of lines with optional context.
+
+With no FILE, text is read from standard input. "context" is the number of
+lines that'd print before and after the result of all other actions. If
+the range is larger than the number of lines in the file, the output is
+truncated at the first and/or last line of the file.
+
+Options:
+-s, --start-num <number>
+start printing from line <number>, default is 1
+
+-b, --back-num <number>
+print <number> lines back
+
+-f, --forward-num <number>
+print <number> lines forward
+
+-u, --until <number>
+print until line <number>
+
+-c, --context <number>
+print <number> lines before and after
+
+-S, --start-str <string>
+print from the first line containing <string>, overrides -s
+
+-B, --back-str <string>
+print lines backwards until <string> is found
+
+-F, --forward-str <string>
+print lines forward until <string> is found
+
+-N, --nested <string>
+print a proper nested block ending in <string>
+start of the block is the argument to either -S or -F
+if both are present, -F overrides -S
+for example -S "{" -F "}" will print
+{
+ 	{
+ 	}
+
+and -S "{" -N "}" will print
+
+{
+ 	{
+ 	}
+ }
+
+-e, --end
+print until the end of the file
+
+-w, --width <number>
+width of the line number field, default is 8
+
+-q, --quiet
+do not print line numbers
+
+-l, --length
+print the number of new line characters in FILE
+
+-?, --help
+print this screen
+
+-v, --version
+print version info
+
+Limits : up to 2147483647 lines with max line length of 1023 characters
+including the new line character.
+
+Example: rprint textfile -s 1 -f 5
+
